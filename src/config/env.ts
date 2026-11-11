@@ -26,11 +26,9 @@ const schema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
 
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.coerce.number().default(587),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASS: z.string().optional(),
-  MAIL_FROM: z.string().default('PrivateChat <no-reply@example.com>'),
+  BREVO_API_KEY: z.string().optional(),
+  MAIL_FROM_EMAIL: z.string().optional(),
+  MAIL_FROM_NAME: z.string().default('M32 Baddies'),
 
   STUN_URLS: z.string().default('stun:stun.l.google.com:19302'),
   TURN_URLS: z.string().optional(),

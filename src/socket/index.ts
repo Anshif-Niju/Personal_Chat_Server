@@ -11,6 +11,7 @@ import { convRoom, sessionRoom, setIo, userRoom } from '../services/realtime';
 import { deliverPending, markConversationRead, markDelivered, sendMessage } from '../services/messages';
 import { markOfflineIfLast, markOnline } from './presence';
 import { handleCallDisconnect, registerCallHandlers, resendPendingCalls } from './calls';
+import { handleGroupCallDisconnect, registerGroupCallHandlers, resendGroupCalls } from './groupCalls';
 
 type Ack = (res: Record<string, unknown>) => void;
 const safeAck = (ack: unknown): Ack => (typeof ack === 'function' ? (ack as Ack) : () => undefined);
@@ -124,9 +125,11 @@ async function onConnection(io: Server, socket: Socket) {
   });
 
   registerCallHandlers(io, socket);
+  registerGroupCallHandlers(io, socket);
 
   socket.on('disconnect', () => {
     handleCallDisconnect(socket);
+    handleGroupCallDisconnect(io, socket);
     void markOfflineIfLast(userId).catch(() => undefined);
   });
 
@@ -136,5 +139,6 @@ async function onConnection(io: Server, socket: Socket) {
   await markOnline(userId).catch(() => undefined);
   await deliverPending(userId).catch(() => undefined);
   resendPendingCalls(socket);
+  resendGroupCalls(socket);
   socket.emit('ready', { userId });
 }
