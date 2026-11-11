@@ -19,6 +19,8 @@ const schema = z.object({
   PUBLIC_API_URL: z.string().default('http://localhost:4000'),
   WEB_APP_URL: z.string().default('http://localhost:5173'),
   TRUST_PROXY: z.coerce.number().default(1),
+  // Comma-separated usernames that can open the admin panel, e.g. "anshif,rasneesh".
+  ADMIN_USERNAMES: z.string().default(''),
   // Self-ping every 10 min in production so the host doesn't put the server to sleep.
   KEEP_ALIVE: z
     .enum(['true', 'false'])
@@ -71,6 +73,7 @@ export const env = {
   isProd: raw.NODE_ENV === 'production',
   isTest: raw.NODE_ENV === 'test',
   clientOrigins: csv(raw.CLIENT_ORIGINS),
+  adminUsernames: csv(raw.ADMIN_USERNAMES).map((s) => s.toLowerCase().replace(/^@/, '')),
   stunUrls: csv(raw.STUN_URLS),
   turnUrls: csv(raw.TURN_URLS),
   maxUploadBytes: raw.MAX_UPLOAD_MB * 1024 * 1024,

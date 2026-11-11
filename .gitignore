@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+
+# Secrets: never commit these. Set the values in Render's Environment page instead.
+.env
+.env.*
+!.env.example
+
+# Uploaded files from local development
+uploads/
+
+*.log
+.DS_Store

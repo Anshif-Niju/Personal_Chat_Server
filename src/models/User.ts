@@ -16,6 +16,8 @@ export interface IUser {
   bio: string;
   isOnline: boolean;
   lastSeen: Date;
+  /** false = waiting for admin approval (can't log in yet). Accounts created before approvals existed count as approved. */
+  approved: boolean;
   passwordChangedAt?: Date;
   resetTokenHash?: string | null;
   resetTokenExpires?: Date | null;
@@ -51,6 +53,7 @@ const userSchema = new Schema<IUser>(
     bio: { type: String, default: '', maxlength: 250 },
     isOnline: { type: Boolean, default: false },
     lastSeen: { type: Date, default: Date.now },
+    approved: { type: Boolean, default: true },
     passwordChangedAt: Date,
     resetTokenHash: { type: String, select: false, default: null },
     resetTokenExpires: { type: Date, select: false, default: null },

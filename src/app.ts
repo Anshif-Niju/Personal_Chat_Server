@@ -15,6 +15,7 @@ import messageRoutes from './routes/messages';
 import mediaRoutes from './routes/media';
 import callRoutes from './routes/calls';
 import settingsRoutes from './routes/settings';
+import adminRoutes from './routes/admin';
 
 export function createApp() {
   const app = express();
@@ -56,6 +57,7 @@ export function createApp() {
   app.use('/api/media', mediaRoutes);
   app.use('/api/calls', callRoutes);
   app.use('/api/me', settingsRoutes);
+  app.use('/api/admin', adminRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

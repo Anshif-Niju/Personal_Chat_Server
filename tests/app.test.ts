@@ -7,6 +7,8 @@ import { io as ioClient, Socket } from 'socket.io-client';
 import { connectDb, disconnectDb } from '../src/config/db';
 import { createApp } from '../src/app';
 import { createSocketServer } from '../src/socket';
+import { User } from '../src/models/User';
+import { connectNewUser } from '../src/services/conversations';
 
 let mongo: MongoMemoryServer;
 let server: http.Server;
@@ -28,8 +30,13 @@ async function register(username: string, password = 'Password123'): Promise<Tes
     .post('/api/auth/register')
     .set(NATIVE)
     .send({ username, password, confirmPassword: password, displayName: username.toUpperCase() });
-  expect(res.status).toBe(201);
-  return { id: res.body.user.id, username, accessToken: res.body.accessToken, refreshToken: res.body.refreshToken };
+  // New accounts wait for admin approval: approve directly, then log in like a normal user.
+  expect(res.status).toBe(202);
+  const user = await User.findOneAndUpdate({ username }, { approved: true }, { new: true });
+  await connectNewUser(String(user!._id));
+  const login = await request(app).post('/api/auth/login').set(NATIVE).send({ identifier: username, password });
+  expect(login.status).toBe(200);
+  return { id: login.body.user.id, username, accessToken: login.body.accessToken, refreshToken: login.body.refreshToken };
 }
 
 const auth = (u: TestUser) => ({ Authorization: `Bearer ${u.accessToken}` });

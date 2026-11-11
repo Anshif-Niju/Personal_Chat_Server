@@ -7,6 +7,8 @@ import { io as ioClient, Socket } from 'socket.io-client';
 import { connectDb, disconnectDb } from '../src/config/db';
 import { createApp } from '../src/app';
 import { createSocketServer } from '../src/socket';
+import { User } from '../src/models/User';
+import { connectNewUser } from '../src/services/conversations';
 
 let mongo: MongoMemoryServer;
 let server: http.Server;
@@ -20,8 +22,12 @@ async function register(username: string) {
     .post('/api/auth/register')
     .set(NATIVE)
     .send({ username, password: 'Password123', confirmPassword: 'Password123', displayName: username });
-  expect(res.status).toBe(201);
-  return { id: res.body.user.id as string, token: res.body.accessToken as string };
+  expect(res.status).toBe(202); // pending admin approval
+  const user = await User.findOneAndUpdate({ username }, { approved: true }, { new: true });
+  await connectNewUser(String(user!._id));
+  const login = await request(app).post('/api/auth/login').set(NATIVE).send({ identifier: username, password: 'Password123' });
+  expect(login.status).toBe(200);
+  return { id: login.body.user.id as string, token: login.body.accessToken as string };
 }
 function connect(u: { token: string }): Promise<Socket> {
   return new Promise((resolve, reject) => {

@@ -12,6 +12,7 @@ import { randomToken, sha256 } from '../utils/tokens';
 import { env } from '../config/env';
 import { sendPasswordResetEmail } from '../services/mail';
 import { connectNewUser } from '../services/conversations';
+import { isAdminUsername } from '../services/admin';
 import {
   REFRESH_COOKIE,
   clearRefreshCookie,
@@ -69,8 +70,13 @@ router.post(
     if (await User.exists({ username })) throw ApiError.conflict('That username is already taken');
     if (email && (await User.exists({ email }))) throw ApiError.conflict('That email is already registered');
 
-    const user = await User.create({ username, email, displayName, passwordHash: await hashPassword(password) });
+    // New accounts wait for an admin to approve them. Admins themselves are approved automatically.
+    const approved = isAdminUsername(username);
+    const user = await User.create({ username, email, displayName, approved, passwordHash: await hashPassword(password) });
     await UserSettings.create({ userId: user._id });
+    if (!approved) {
+      return res.status(202).json({ pending: true, message: 'Your request was sent. You can log in after an admin approves your account.' });
+    }
     await connectNewUser(String(user._id)).catch(() => undefined);
     const { accessToken, refreshToken } = await createSession(user._id, req);
     sendAuthResponse(req, res, 201, { user: toMe(user.toObject()), accessToken, refreshToken });
@@ -97,6 +103,7 @@ router.post(
     const user = await User.findOne(query).select('+passwordHash');
     const ok = await verifyPassword(password, user?.passwordHash ?? (await getDummyHash()));
     if (!user || !ok) throw ApiError.unauthorized('Incorrect username/email or password');
+    if (user.approved === false) throw ApiError.forbidden('Your account is waiting for admin approval. Try again after it is approved.');
 
     const { accessToken, refreshToken } = await createSession(user._id, req);
     const obj = user.toObject() as unknown as Record<string, unknown>;

@@ -38,6 +38,7 @@ router.get(
 
     const users = await User.find({
       _id: { $nin: exclude },
+      approved: { $ne: false },
       $or: [{ username: { $regex: `^${rx.toLowerCase()}` } }, { displayName: { $regex: rx, $options: 'i' } }],
     })
       .select(PUBLIC_USER_FIELDS)

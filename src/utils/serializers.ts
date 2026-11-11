@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IUserSettings, Visibility } from '../models/UserSettings';
 import { fileUrl } from '../services/storage';
+import { env } from '../config/env';
 
 export const PUBLIC_USER_FIELDS = 'username displayName avatar bio isOnline lastSeen createdAt';
 
@@ -44,7 +45,11 @@ export function toPublicUser(user: any, ctx: PresenceContext = {}) {
 
 /** Full profile for the account owner (includes email). */
 export function toMe(user: any) {
-  return { ...toPublicUser(user, { viewerId: String(user._id) })!, email: user.email ?? null };
+  return {
+    ...toPublicUser(user, { viewerId: String(user._id) })!,
+    email: user.email ?? null,
+    isAdmin: env.adminUsernames.includes(String(user.username).toLowerCase()),
+  };
 }
 
 function briefSender(s: any) {

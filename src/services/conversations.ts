@@ -183,7 +183,7 @@ export async function getOrCreatePrivate(userId: string, otherId: string) {
  * private chat with each, so everybody appears in everyone's chat list right away.
  */
 export async function connectNewUser(newUserId: string) {
-  const others = await User.find({ _id: { $ne: newUserId } }).select('_id').lean();
+  const others = await User.find({ _id: { $ne: newUserId }, approved: { $ne: false } }).select('_id').lean();
   if (others.length === 0) return;
   const now = new Date();
   await FriendRequest.insertMany(
@@ -381,7 +381,7 @@ export async function setAdmin(actorId: string, conversationId: string, memberId
   return loadSerializedConversation(conversationId, actorId);
 }
 
-async function deleteConversationData(conv: ConversationDoc) {
+export async function deleteConversationData(conv: ConversationDoc) {
   const files = await Message.find({ conversationId: conv._id, attachment: { $ne: null } }).select('attachment').lean();
   await Message.deleteMany({ conversationId: conv._id });
   await Conversation.deleteOne({ _id: conv._id });
