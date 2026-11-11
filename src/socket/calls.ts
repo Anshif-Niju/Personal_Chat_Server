@@ -49,7 +49,7 @@ const initiateSchema = z.object({ calleeId: objectId, callType: z.enum(['audio',
 const callIdSchema = z.object({ callId: objectId });
 const signalSchema = z.object({
   callId: objectId,
-  payload: z.object({ type: z.enum(['offer', 'answer', 'candidate']) }).passthrough(),
+  payload: z.object({ type: z.enum(['offer', 'answer', 'candidate', 'share']) }).passthrough(),
 });
 
 async function finalizeCall(callId: string, status: CallStatus) {

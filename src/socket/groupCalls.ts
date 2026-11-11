@@ -44,7 +44,7 @@ const callIdSchema = z.object({ callId: objectId });
 const signalSchema = z.object({
   callId: objectId,
   to: objectId,
-  payload: z.object({ type: z.enum(['offer', 'answer', 'candidate']) }).passthrough(),
+  payload: z.object({ type: z.enum(['offer', 'answer', 'candidate', 'share']) }).passthrough(),
 });
 
 const incomingPayload = (gc: GroupCall) => ({
