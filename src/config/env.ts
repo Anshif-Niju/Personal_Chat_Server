@@ -19,6 +19,12 @@ const schema = z.object({
   PUBLIC_API_URL: z.string().default('http://localhost:4000'),
   WEB_APP_URL: z.string().default('http://localhost:5173'),
   TRUST_PROXY: z.coerce.number().default(1),
+  // Self-ping every 10 min in production so the host doesn't put the server to sleep.
+  KEEP_ALIVE: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+  KEEP_ALIVE_URL: z.string().optional(),
 
   STORAGE_DRIVER: z.enum(['local', 'cloudinary']).default('local'),
   MAX_UPLOAD_MB: z.coerce.number().default(25),

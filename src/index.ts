@@ -4,6 +4,7 @@ import { connectDb, disconnectDb } from './config/db';
 import { createApp } from './app';
 import { createSocketServer } from './socket';
 import { User } from './models/User';
+import { startKeepAlive } from './services/keepAlive';
 
 async function main() {
   await connectDb();
@@ -19,9 +20,12 @@ async function main() {
     console.log(`[server] listening on :${env.PORT} (${env.NODE_ENV})`);
   });
 
+  const stopKeepAlive = startKeepAlive();
+
   const shutdown = async (signal: string) => {
     // eslint-disable-next-line no-console
     console.log(`[server] ${signal} received, shutting down`);
+    stopKeepAlive();
     io.close();
     server.close();
     await disconnectDb();
