@@ -43,6 +43,9 @@ const schema = z.object({
   TURN_USERNAME: z.string().optional(),
   TURN_CREDENTIAL: z.string().optional(),
   TURN_SECRET: z.string().optional(),
+  // Cloudflare Realtime TURN (https://developers.cloudflare.com/realtime/turn/)
+  CLOUDFLARE_TURN_KEY_ID: z.string().optional(),
+  CLOUDFLARE_TURN_API_TOKEN: z.string().optional(),
   TURN_TTL_SECONDS: z.coerce.number().default(3600),
 
   VAPID_PUBLIC_KEY: z.string().optional(),

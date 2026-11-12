@@ -5,6 +5,7 @@ import { createApp } from './app';
 import { createSocketServer } from './socket';
 import { User } from './models/User';
 import { startKeepAlive } from './services/keepAlive';
+import { startCloudflareTurn } from './services/ice';
 
 async function main() {
   await connectDb();
@@ -21,11 +22,13 @@ async function main() {
   });
 
   const stopKeepAlive = startKeepAlive();
+  const stopCloudflareTurn = startCloudflareTurn();
 
   const shutdown = async (signal: string) => {
     // eslint-disable-next-line no-console
     console.log(`[server] ${signal} received, shutting down`);
     stopKeepAlive();
+    stopCloudflareTurn();
     io.close();
     server.close();
     await disconnectDb();
